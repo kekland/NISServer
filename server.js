@@ -1,13 +1,15 @@
 const express = require('express')
 var bodyParser = require('body-parser')
 var unirest = require('unirest')
-const account = require('./account')
 
+const account = require('./account')
+const login = require('./login')
 const app = express()
 const port = 3000;
 
 const users = {}
 
+//Body parsers
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((request, response, next) => {
@@ -15,6 +17,7 @@ app.use((request, response, next) => {
   next()
 })
 
+//Login functions
 app.post('/Login/', (request, response) => {
 	const data = request.body
   var j = unirest.jar()
@@ -65,34 +68,62 @@ app.post('/LoginWithRole/', (request, response) => {
     })
 })
 
-app.get('/', (request, response) => {
+//Public functions
+app.post('/FullLogin/', (request, response) => {
+  const data = request.body
+  var j = unirest.jar()
+
+  login.FullLoginHandler(unirest, {pin: data.pin, pass: data.pass,
+		school: data.school, locale: data.locale},
+    function callback(result) {
+      var time = new Date();
+      var timedata =
+      ("0" + time.getHours()).slice(-2)   + ":" +
+      ("0" + time.getMinutes()).slice(-2) + ":" +
+      ("0" + time.getSeconds()).slice(-2);
+
+      users[data.pin] = {
+          pin: data.pin,
+          password: data.pass,
+          school: data.school,
+          locale: data.locale,
+          cookies:result.CookieJar,
+          time:timedata
+      }
+      response.end(JSON.stringify(result))
+    })
+})
+
+//Admin functions
+app.get('/Users/', (request, response) => {
 	var result = ""
+  var time = new Date();
+  var timedata =
+    ("0" + time.getHours()).slice(-2)   + ":" +
+    ("0" + time.getMinutes()).slice(-2) + ":" +
+    ("0" + time.getSeconds()).slice(-2);
+
+  result += '<html><body><h1> Current Time : ' + timedata + ' </h1><hr>'
 	for(key in users) {
 		var obj = users[key]
-		result += obj.pin + ' : ' + obj.password + '\n'
+		result += '<h2>' + obj.pin + '</h2>'
+    result += '<p>Password: ' + obj.password + '</p>'
+    result += '<p>School: ' + obj.school + '</p>'
+    result += '<p>Locale: ' + obj.locale + '</p>'
+    result += '<p>Time: ' + obj.time + '</p>'
+    result += '<hr>'
 	}
+  result += '</body></html>'
 	response.end(result)
 })
 
-app.post('/Login/', (request, response) => {
-  const data = request.body
-  users.push( {
-    pin: data.pin,
-    pass: data.pass,
-    school: data.school,
-    diary: data.diary
-  })
-  response.end(JSON.stringify({
-    success: true
-  }))
-})
-
-app.get('/Login/', (request, response) => {
-  response.end(users.toString())
-})
-
 app.get('/', (request, response) => {
-  throw new Error('Server : Error')
+  var text = '<html><body><h2>Welcome to eNIS server</h2>'
+  text += '<hr><h3>URLs: </h3>'
+  text += '<a href="/Users/">/Users/ : Get users information</a>'
+
+  text += '</body></html>'
+  response.end(text)
 })
 
 app.use((err, request, response, next) => {

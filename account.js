@@ -62,6 +62,7 @@ function LoginWithRoleHandler(requester, jar, data, listener) {
 		}
 	})
 }
+
 module.exports.LoginHandler = LoginHandler
 module.exports.GetRolesHandler = GetRolesHandler
 module.exports.LoginWithRoleHandler = LoginWithRoleHandler
