@@ -1,84 +1,67 @@
-function LoginHandler(requester, data, listener) {
+function LoginHandler(requester, jar, data, listener) {
 
-	var requestData = JSON.stringify({
+	var requestData = {
 		txtUsername: data.pin,
 		txtPassword: data.password
-	})
-	var cookies = 'Culture=' + data.locale + ';';
-
-	var headers = {
-		'Content-Type': 'application/json',
-		'Content-Length': Buffer.byteLength(requestData),
-		'Cookie': cookies
 	}
 
-	var options = {
-		url: data.school + '/Account/Login/',
-		method: 'POST',
-		headers: headers,
-		body: requestData
-	}
+	requester.post(data.school + '/Account/Login')
+		.send(requestData)
+		.jar(jar)
+		.end(function (response) {
+			var jsonResponse = response.body
+			if(jsonResponse.success === true) {
+				listener({success: true}, jar)
+			}
+			else {
+				listener({success: false, message: jsonResponse.ErrorMessage}, jar)
+			}
+		})
+}
+function GetRolesHandler(requester, jar, data, listener) {
 
-	requester.post(options, function callback(error, response, body) {
-		if(error) {
-			listener({
-				success: false,
-				message: error.toString()
-			})
-		}
-
-		var responseJSON = JSON.parse(response.body)
+	requester.post(data.school + '/Account/GetRoles/')
+	.jar(jar)
+	.end(function (response) {
+		var responseJSON = response.body
 		if(responseJSON.success === true) {
 			listener({
 				success:true,
-				cookie:response.headers['set-cookie']
-			})
+				data: responseJSON
+			}, jar)
 		}
 		else {
 			listener({
 				success: false,
 				message: responseJSON.ErrorMessage
-			})
+			}, jar)
 		}
 	})
 }
-function GetRolesHandler(requester, data, listener) {
-	var cookies = 'Culture=' + data.locale + ';';
-
-	var headers = {
-		'Content-Type': 'application/json',
-		'Cookie': data.cookies
+function LoginWithRoleHandler(requester, jar, data, listener) {
+	var requestData = {
+		role: data.role,
+		password: data.password
 	}
 
-	var options = {
-		url: data.school + '/Account/GetRoles/',
-		method: 'POST',
-		headers: headers
-	}
-
-	requester.post(options, function callback(error, response, body) {
-		if(error) {
-			listener({
-				success: false,
-				message: error.toString()
-			})
-		}
-
-		var responseJSON = JSON.parse(response.body)
+	requester.post(data.school + '/Account/LoginWithRole/')
+	.send(requestData)
+	.jar(jar)
+	.end(function (response) {
+		var responseJSON = response.body
 		if(responseJSON.success === true) {
 			listener({
-				success:true,
-				cookie:response.headers['set-cookie'],
-				listRole: JSON.stringify(responseJSON)
-			})
+				success:true
+			}, jar)
 		}
 		else {
 			listener({
 				success: false,
 				message: responseJSON.ErrorMessage
-			})
+			}, jar)
 		}
 	})
 }
 module.exports.LoginHandler = LoginHandler
 module.exports.GetRolesHandler = GetRolesHandler
+module.exports.LoginWithRoleHandler = LoginWithRoleHandler
