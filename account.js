@@ -87,12 +87,7 @@ function getRoles(data, listener) {
           } else if (responseRoles.indexOf('Teacher') != -1) {
             role = 'Teacher'
           } else {
-            listener({
-              success: false,
-              message: 'No suitable role found',
-              roles: response.listRole
-            })
-            return
+            role = response.listRole[0].value
           }
           listener({
             success: true,
