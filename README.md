@@ -6,7 +6,7 @@ Log in to system - this request authenticates user to system and allows to use o
 
 _Query_ :
 - _pin_ : Personal Identification Number
-- _pass_ : Password
+- _password_ : Password
 - _school_ : School URL (List of URLs are below)
 - _locale_ : User locale 
 
@@ -17,7 +17,7 @@ Check user credentials, does not require and grant authentication
 
 _Query_ :
 - _pin_ : Personal Identification Number
-- _pass_ : Password
+- _password_ : Password
 - _school_ : School URL (List of URLs are below)
 - _locale_ : User locale 
 
@@ -30,7 +30,7 @@ Also, you should be authenticated to use this request.
 
 _Query_ :
 - _pin_ : Personal Identification Number
-- _pass_ : Password
+- _password_ : Password
 
 ### Subjects
 #### /GetIMKOSubjects/ #### 
@@ -38,7 +38,7 @@ Gets IMKO subjects, requires authentication
 
 _Query_ :
 - _pin_ : Personal Identification Number
-- _pass_ : Password
+- _password_ : Password
 - _childID_ : ID of child - leave blank if user role is not parent
 
 #### /GetIMKOSubjectsForQuarter/ #### 
@@ -46,7 +46,7 @@ Gets IMKO subjects for selected quarter, requires authentication
 
 _Query_ :
 - _pin_ : Personal Identification Number
-- _pass_ : Password
+- _password_ : Password
 - _childID_ : ID of child - leave blank if user role is not parent
 - _quarter_ : ID of quarter (from 1 to 4)
 
@@ -55,7 +55,7 @@ Gets JKO subjects, requires authentication
 
 _Query_ :
 - _pin_ : Personal Identification Number
-- _pass_ : Password
+- _password_ : Password
 - _childID_ : ID of child - leave blank if user role is not parent
 - _classID_ : ID of class - leave blank if user role is not parent
 
@@ -64,7 +64,7 @@ Gets JKO subjects for selected quarter, requires authentication
 
 _Query_ :
 - _pin_ : Personal Identification Number
-- _pass_ : Password
+- _password_ : Password
 - _quarterID_ : ID of quarter (from 1 to 4)
 - _childID_ : ID of child - leave blank if user role is not parent
 - _classID_ : ID of class - leave blank if user role is not parent
