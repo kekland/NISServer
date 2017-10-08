@@ -76,23 +76,28 @@ function getSubjectsOnQuarter(data, listener) {
       .header('Referer', link)
       .send(params)
       .end(function(subjectsResult) {
-        var response = JSON.parse(subjectsResult.body)
-        var data = response.data
-        var resp = []
-        for(var item of data) {
-          var object = {
-            id: item.JournalId,
-            name: item.Name,
-            grade: item.Mark,
-            percent: item.Score
+        if(subjectsResult.statusType == 2) {
+          var response = JSON.parse(subjectsResult.body)
+          var data = response.data
+          var resp = []
+          for(var item of data) {
+            var object = {
+              id: item.JournalId,
+              name: item.Name,
+              grade: item.Mark,
+              percent: item.Score
+            }
+            if(item.Evalutions.length > 0) {
+              object.topicEvaluationID = item.Evalutions[0].Id
+              object.quarterEvaluationID = item.Evalutions[1].Id
+            }
+            resp.push(object)
           }
-          if(item.Evalutions.length > 0) {
-            object.topicEvaluationID = item.Evalutions[0].Id
-            object.quarterEvaluationID = item.Evalutions[1].Id
-          }
-          resp.push(object)
+          listener({success:true, data:resp})
         }
-        listener({success:true, data:resp})
+        else {
+          listener({success: false, message: 'No connection to server'})
+        }
       })
     }
     else {
@@ -112,17 +117,22 @@ function getLink(data, listener) {
   .send(requestData)
   .jar(data.jar)
   .end(function(responseText) {
-    var response = responseText.body
-    if(response.success === true) {
-      var link = response.data
-      unirest.post(link)
-      .jar(data.jar)
-      .end(function(linkResponse) {
-        listener({success:true, link: link})
-      })
+    if(responseText.statusType == 2) {
+      var response = responseText.body
+      if(response.success === true) {
+        var link = response.data
+        unirest.post(link)
+        .jar(data.jar)
+        .end(function(linkResponse) {
+          listener({success:true, link: link})
+        })
+      }
+      else {
+        listener({success:false})
+      }
     }
     else {
-      listener({success:false})
+      listener({success: false, message: 'No connection to server'})
     }
   })
 }
@@ -135,8 +145,13 @@ function getStudentData(data, listener) {
   unirest.post(data.school + '/JceDiary/JceDiary')
   .jar(data.jar)
   .end(function(responseText) {
-    var response = responseText.body
-    listener(getChildDataByResponse(response))
+    if(responseText.statusType == 2) {
+      var response = responseText.body
+      listener(getChildDataByResponse(response))
+    }
+    else {
+      listener({success: false, message: 'No connection to server'})
+    }
   })
 }
 

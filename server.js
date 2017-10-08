@@ -13,6 +13,8 @@ var jko = require('./jko')
 var imkogoals = require('./imkogoals')
 var jkogoals = require('./jkogoals')
 
+var misc = require('./misc')
+
 const app = express()
 const port = 3000;
 
@@ -25,8 +27,6 @@ function exitHandler() {
 
 process.on('exit', exitHandler.bind(null));
 process.on('SIGINT', exitHandler.bind(null));
-process.on('SIGUSR1', exitHandler.bind(null));
-process.on('SIGUSR2', exitHandler.bind(null));
 
 console.log('Initializing server')
 console.log('Loading data')
@@ -74,7 +74,7 @@ function getTime() {
   return timedata
 }
 
-//Body parsers
+// Body parsers
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((request, response, next) => {
@@ -82,7 +82,7 @@ app.use((request, response, next) => {
   next()
 })
 
-//Public functions
+// Public functions
 app.post('/Login/', (request, response) => {
   account.fullLogin(request, response,
     function callback(result) {
@@ -115,6 +115,7 @@ app.post('/GetIMKOSubjects/', (request, response) => {
     }
   })
 })
+
 app.post('/GetIMKOSubjectsByQuarter/', (request, response) => {
   var data = request.body
   updateCookies(data, function(result) {
@@ -182,6 +183,31 @@ app.post('/GetJKOGoals/', (request, response) => {
       response.send(JSON.stringify(result))
     }
   })
+})
+
+app.post('/ChangeLocale/', (request, response) => {
+  var data = request.body
+  if(data.pin != undefined) {
+    var user = users[data.pin]
+    if(user.password == data.password) {
+      users[data.pin].locale = data.locale
+      response.send(JSON.stringify({success:true}))
+    }
+    else {
+      response.send(JSON.stringify({success:false}))
+    }
+  }
+  else {
+    response.send(JSON.stringify({success:false}))
+  }
+})
+
+app.post('/CheckCredentials/', (request, response) => {
+  account.checkCredentials(request, response)
+})
+
+app.post('/GetPasswordStrength/', (request, response) => {
+  misc.getPasswordStrength(request, response)
 })
 //Admin functions
 app.get('/Users/', (request, response) => {

@@ -52,29 +52,34 @@ function getSubjectOnQuarter(data, listener) {
   .encoding('utf-8')
   .jar(data.jar)
   .end(function(responseText) {
-    var response = responseText.body
-    if(response.success === true) {
-      var data = []
-      for(var item of response.data) {
-        data.push({
-          id: item.Id,
-          name: item.Name,
-          formative: {
-            current: item.ApproveCnt,
-            maximum: item.Cnt
-          },
-          summative: {
-            current: item.ApproveISA,
-            maximum: item.MaxISA
-          },
-          grade: item.Period,
-          lastChanged: item.LastChanged
-        })
+    if(responseText.statusType == 2) {
+      var response = responseText.body
+      if(response.success === true) {
+        var data = []
+        for(var item of response.data) {
+          data.push({
+            id: item.Id,
+            name: item.Name,
+            formative: {
+              current: item.ApproveCnt,
+              maximum: item.Cnt
+            },
+            summative: {
+              current: item.ApproveISA,
+              maximum: item.MaxISA
+            },
+            grade: item.Period,
+            lastChanged: item.LastChanged
+          })
+        }
+        listener({success:true, data:data})
       }
-      listener({success:true, data:data})
+      else {
+        listener({success:false, message:response.message})
+      }
     }
     else {
-      listener({success:false, message:response.message})
+      listener({success: false, message: 'No connection to server'})
     }
   })
 }

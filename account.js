@@ -23,12 +23,17 @@ function login(data, listener) {
   .jar(jar)
   .encoding('utf-8')
   .end(function(responseText) {
-    var response = responseText.body
-    if(response.success === true) {
-      listener({success: true, jar: jar})
+    if(responseText.statusType == 2) {
+      var response = responseText.body
+      if(response.success === true) {
+        listener({success: true, jar: jar})
+      }
+      else {
+        listener({success: false, message: response.ErrorMessage, jar: jar})
+      }
     }
     else {
-      listener({success: false, message: response.ErrorMessage, jar: jar})
+      listener({success: false, message: 'No connection to server'})
     }
   })
 }
@@ -38,32 +43,37 @@ function getRoles(data, listener) {
   .jar(data.jar)
   .encoding('utf-8')
   .end(function(responseText) {
-    var response = responseText.body
-    if(response.success === true) {
-      var role;
+    if(responseText.statusType == 2) {
+      var response = responseText.body
+      if(response.success === true) {
+        var role;
 
-      var responseRoles = JSON.stringify(response.listRole)
-      if(responseRoles.indexOf('Student') != -1) {
-        role = 'Student'
-      }
-      else if(responseRoles.indexOf('Parent') != -1) {
-        role = 'Parent'
-      }
-      else if(responseRoles.indexOf('Teacher') != -1) {
-        role = 'Teacher'
+        var responseRoles = JSON.stringify(response.listRole)
+        if(responseRoles.indexOf('Student') != -1) {
+          role = 'Student'
+        }
+        else if(responseRoles.indexOf('Parent') != -1) {
+          role = 'Parent'
+        }
+        else if(responseRoles.indexOf('Teacher') != -1) {
+          role = 'Teacher'
+        }
+        else {
+          listener({
+            success: false,
+            message: 'No suitable role found',
+            roles: response.listRole
+          })
+          return
+        }
+        listener({success: true, role: role, roles: response.listRole})
       }
       else {
-        listener({
-          success: false,
-          message: 'No suitable role found',
-          roles: response.listRole
-        })
-        return
+        listener({success: false, message: response.ErrorMessage})
       }
-      listener({success: true, role: role, roles: response.listRole})
     }
     else {
-      listener({success: false, message: response.ErrorMessage})
+      listener({success: false, message: 'No connection to server'})
     }
   })
 }
@@ -80,12 +90,17 @@ function loginWithRole(data, listener) {
   .jar(jar)
   .encoding('utf-8')
   .end(function(responseText) {
-    var response = responseText.body
-    if(response.success === true) {
-      listener({success: true, jar: jar})
+    if(responseText.statusType == 2) {
+      var response = responseText.body
+      if(response.success === true) {
+        listener({success: true, jar: jar})
+      }
+      else {
+        listener({success: false, message: response.ErrorMessage})
+      }
     }
     else {
-      listener({success: false, message: response.ErrorMessage})
+      listener({success: false, message: 'No connection to server'})
     }
   })
 }
@@ -95,52 +110,53 @@ function getChildren(data, listener) {
   	.jar(data.jar)
     .encoding('utf-8')
   	.end(function(response) {
-  		var responseJSON = response.body
-  		if(responseJSON.success === true) {
-  				var classData = responseJSON.data
-  				for(var i = 0; i < classData.length; i++) {
-  					var classID = classData[i].Id
-  					var className = classData[i].Name
-  					var students = []
+      if(response.statusType == 2) {
+  		  var responseJSON = response.body
+  		  if(responseJSON.success === true) {
+  		      var classData = responseJSON.data
+  			    for(var i = 0; i < classData.length; i++) {
+  				var classID = classData[i].Id
+  				var className = classData[i].Name
+  				var students = []
 
-  					var requestParams = {
-  						klassId: classID,
-  						query: ''
-  					}
-  					var bad = false
-  					unirest.post(data.school + '/ImkoDiary/Students')
-  					.jar(data.jar)
-  					.send(requestParams)
-            .encoding('utf-8')
-  					.end(function(responseStudents) {
-  						var studentsJSON = responseStudents.body
-  						if(studentsJSON.success === true) {
-  							var studentsData = studentsJSON.data
-  							for(var s = 0; s < studentsData.length; s++) {
-  								students.push({
-  									classID:classID,
-  									className:className,
-  									studentID:studentsData[s].Id,
-  									studentName:studentsData[s].Name
-  								})
-  							}
-  							if(i == classData.length) {
-  								listener({
-  									success:true,
-  									data:students
-  								})
-  							}
-  						}
-  						else {
-  							if(bad) {return}
-  							bad = true
-  							listener({
-  								success:false,
-  								message: studentsJSON.ErrorMessage
+  				var requestParams = {
+  					klassId: classID,
+  					query: ''
+  				}
+  				var bad = false
+  				unirest.post(data.school + '/ImkoDiary/Students')
+  				.jar(data.jar)
+  				.send(requestParams)
+          .encoding('utf-8')
+  				.end(function(responseStudents) {
+  					var studentsJSON = responseStudents.body
+  					if(studentsJSON.success === true) {
+  						var studentsData = studentsJSON.data
+  						for(var s = 0; s < studentsData.length; s++) {
+  							students.push({
+  								classID:classID,
+  								className:className,
+  								studentID:studentsData[s].Id,
+  								studentName:studentsData[s].Name
   							})
   						}
-  					})
-  				}
+  						if(i == classData.length) {
+  							listener({
+  								success:true,
+  								data:students
+  							})
+  						}
+  					}
+  					else {
+  						if(bad) {return}
+  						bad = true
+  						listener({
+  							success:false,
+  							message: studentsJSON.ErrorMessage
+  						})
+  					}
+  				})
+  			}
   		}
   		else {
   			listener({
@@ -148,7 +164,11 @@ function getChildren(data, listener) {
   				message: responseJSON.ErrorMessage
   			})
   		}
-  	})
+  	}
+    else {
+      listener({success: false, message: 'No connection to server'})
+    }
+  })
 }
 
 function fullLogin(request, response, listener) {
@@ -219,7 +239,6 @@ function fullLogin(request, response, listener) {
     })
 }
 
-
 function updateCookies(data, listener) {
   login({pin: data.pin, password: data.password, school: data.school, locale: data.locale},
     function callback(result) {
@@ -260,5 +279,18 @@ function updateCookies(data, listener) {
       }
     })
 }
+
+function checkCredentials(request, response) {
+  var data = request.body
+  login(data, function(result) {
+    if(result.success === true) {
+      response.send(JSON.stringify({success: true}))
+    }
+    else {
+      response.send(JSON.stringify({success: false}))
+    }
+  })
+}
+
 module.exports.fullLogin = fullLogin
 module.exports.updateCookies = updateCookies
