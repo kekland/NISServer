@@ -1,7 +1,8 @@
 # NISServer
 ## URLs
+Base URL is <code>https://nis-api.herokuapp.com/</code>
 ### Account
-#### /FullLogin/ #### 
+#### /Login/ #### 
 Log in to system - this request authenticates user to system and allows to use other requests
 
 _Query_ :
@@ -70,6 +71,22 @@ _Query_ :
 - _classID_ : ID of class - leave blank if user role is not parent
 
 ### Goals
-**/GetIMKOGoals/** - Get goals and homework (IMKO)
+#### /GetIMKOGoals/ #### 
+Gets IMKO goals, requires authentication
 
-**/GetJKOGoals/** - Get goals (JKO)
+_Query_ :
+- _pin_ : Personal Identification Number
+- _password_ : Password
+- _quarterID_ : ID of quarter (from 1 to 4)
+- _subjectID_ : ID of subject
+- _childID_ : ID of child - leave blank if user role is not parent
+
+#### /GetJKOGoals/ #### 
+Gets JKO goals, requires authentication
+
+_Query_ :
+- _pin_ : Personal Identification Number
+- _password_ : Password
+- _topicEvaluationID_ : ID of topic evaluation
+- _quarterEvaluationID_ : ID of quarter evaluation
+- _journalID_ : ID of subject in journal
