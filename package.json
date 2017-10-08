@@ -1,35 +1,5 @@
 {
-  "name": "nis-api",
-  "version": "1.0.0",
-  "description": "API for NIS",
-  "main": "server.js",
- "engines": {"node": "6.11.4"}, "dependencies": {
-    "body-parser": "^1.18.2",
-    "express": "^4.16.1",
-    "jsonfile": "^4.0.0",
-    "request": "^2.83.0",
-    "unirest": "^0.5.1"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kekland/NISServer.git"
-  },
-  "keywords": [
-    "nis"
-  ],
-  "author": "kekland (vk.com/kekland322)",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/kekland/NISServer/issues"
-  },
-  "homepage": "https://github.com/kekland/NISServer#readme"
-}
-{
+
   "name": "nis-api",
   "version": "1.0.0",
   "description": "API for NIS",
