@@ -87,8 +87,8 @@ function getSubjectsOnQuarter(data, listener) {
             percent: item.Score
           }
           if(item.Evalutions.length > 0) {
-            object.topicID = item.Evalutions[0].Id
-            object.quarterID = item.Evalutions[1].Id
+            object.topicEvaluationID = item.Evalutions[0].Id
+            object.quarterEvaluationID = item.Evalutions[1].Id
           }
           resp.push(object)
         }

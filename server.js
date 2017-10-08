@@ -10,6 +10,9 @@ var account = require('./account')
 var imko = require('./imko')
 var jko = require('./jko')
 
+var imkogoals = require('./imkogoals')
+var jkogoals = require('./jkogoals')
+
 const app = express()
 const port = 3000;
 
@@ -152,6 +155,34 @@ app.post('/GetJKOSubjectsByQuarter/', (request, response) => {
   })
 })
 
+app.post('/GetIMKOGoals/', (request, response) => {
+  var data = request.body
+  updateCookies(data, function(result) {
+    if(result.success === true) {
+      var user = users[data.pin]
+      imkogoals.getGoals({school: user.school, childID: data.childID, quarterID: data.quarterID, subjectID: data.subjectID,
+        jar:user.jar}, response)
+    }
+    else {
+      response.send(JSON.stringify(result))
+    }
+  })
+})
+
+app.post('/GetJKOGoals/', (request, response) => {
+  var data = request.body
+  updateCookies(data, function(result) {
+    if(result.success === true) {
+      var user = users[data.pin]
+      jkogoals.getGoals({school: user.school, topicEvaluationID: data.topicEvaluationID,
+        quarterEvaluationID: data.quarterEvaluationID, journalID: data.journalID,
+        jar:user.jar}, response)
+    }
+    else {
+      response.send(JSON.stringify(result))
+    }
+  })
+})
 //Admin functions
 app.get('/Users/', (request, response) => {
 	var result = ""
@@ -179,6 +210,10 @@ app.get('/', (request, response) => {
 
   text += '</body></html>'
   response.send(text)
+})
+
+app.get('/', (request, response) => {
+  throw new Error('Server : Error')
 })
 
 app.use((err, request, response, next) => {
