@@ -3,7 +3,9 @@
 Base URL is <code>https://nis-api.herokuapp.com/</code>
 ## Account
 ### /Login/ ### 
-Log in to system - this request authenticates user to system and allows to use other requests
+Log in to system - this request authenticates user to system and allows to use other requests.
+
+If request succeeded, you will recieve cookie called loginID. You should keep it forever, because this is the key to all requests.
 
 _Query_ :
 - _pin_ : Personal Identification Number
@@ -45,11 +47,9 @@ _There are three locales available : ru-RU, kk-KZ, en-US_
 
 ## Subjects
 ### /IMKO/GetIMKOSubjects/ ### 
-Gets IMKO subjects, requires authentication
+Gets IMKO subjects, requires authentication and cookie
 
 _Query_ :
-- _pin_ : Personal Identification Number
-- _password_ : Password
 - _childID_ : ID of child - leave blank if user role is not parent
 
 #### Sample response : ####
@@ -66,11 +66,9 @@ _Query_ :
 ```
 
 ### /IMKO/GetIMKOSubjectsForQuarter/ ### 
-Gets IMKO subjects for selected quarter, requires authentication
+Gets IMKO subjects for selected quarter, requires authentication and cookie
 
 _Query_ :
-- _pin_ : Personal Identification Number
-- _password_ : Password
 - _childID_ : ID of child - leave blank if user role is not parent
 - _quarter_ : ID of quarter (from 1 to 4)
 
@@ -84,11 +82,9 @@ _Query_ :
 ```
 
 ### /JKO/GetJKOSubjects/ ### 
-Gets JKO subjects, requires authentication
+Gets JKO subjects, requires authentication and cookie
 
 _Query_ :
-- _pin_ : Personal Identification Number
-- _password_ : Password
 - _childID_ : ID of child - leave blank if user role is not parent
 - _classID_ : ID of class - leave blank if user role is not parent
 
@@ -106,11 +102,9 @@ _Query_ :
 ```
 
 ### /JKO/GetJKOSubjectsForQuarter/ ### 
-Gets JKO subjects for selected quarter, requires authentication
+Gets JKO subjects for selected quarter, requires authentication and cookie
 
 _Query_ :
-- _pin_ : Personal Identification Number
-- _password_ : Password
 - _quarterID_ : ID of quarter (from 1 to 4)
 - _childID_ : ID of child - leave blank if user role is not parent
 - _classID_ : ID of class - leave blank if user role is not parent
@@ -126,11 +120,9 @@ _Query_ :
 ```
 ## Goals
 ### /IMKO/GetIMKOGoals/ ###
-Gets IMKO goals, requires authentication
+Gets IMKO goals, requires authentication and cookie
 
 _Query_ :
-- _pin_ : Personal Identification Number
-- _password_ : Password
 - _quarterID_ : ID of quarter (from 1 to 4)
 - _subjectID_ : ID of subject
 - _childID_ : ID of child - leave blank if user role is not parent
@@ -145,11 +137,9 @@ _Query_ :
 ```
 
 ### /JKO/GetJKOGoals/ ### 
-Gets JKO goals, requires authentication
+Gets JKO goals, requires authentication and cookie
 
 _Query_ :
-- _pin_ : Personal Identification Number
-- _password_ : Password
 - _topicEvaluationID_ : ID of topic evaluation
 - _quarterEvaluationID_ : ID of quarter evaluation
 - _journalID_ : ID of subject in journal
