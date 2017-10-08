@@ -12,7 +12,7 @@ function getSubjects(data, response) {
       jar : data.jar
     }
     const quarter = i
-    getSubjectOnPeriod(requestData, function(reqResult) {
+    getSubjectOnQuarter(requestData, function(reqResult) {
       if(reqResult.success === true) {
         result[quarter - 1] = {
           quarter: quarter,
@@ -33,13 +33,13 @@ function getSubjects(data, response) {
   }
 }
 
-function getSubjectsByPeriod(data, response) {
-  getSubjectOnPeriod(data, function(result) {
+function getSubjectsByQuarter(data, response) {
+  getSubjectOnQuarter(data, function(result) {
     response.send(JSON.stringify(result))
   })
 }
 
-function getSubjectOnPeriod(data, listener) {
+function getSubjectOnQuarter(data, listener) {
   var requestData = {
     periodId: data.quarterID,
   }
@@ -54,7 +54,24 @@ function getSubjectOnPeriod(data, listener) {
   .end(function(responseText) {
     var response = responseText.body
     if(response.success === true) {
-      listener({success:true, data:response.data})
+      var data = []
+      for(var item of response.data) {
+        data.push({
+          id: item.Id,
+          name: item.Name,
+          formative: {
+            current: item.ApproveCnt,
+            maximum: item.Cnt
+          },
+          summative: {
+            current: item.ApproveISA,
+            maximum: item.MaxISA
+          },
+          grade: item.Period,
+          lastChanged: item.LastChanged
+        })
+      }
+      listener({success:true, data:data})
     }
     else {
       listener({success:false, message:response.message})
@@ -62,5 +79,5 @@ function getSubjectOnPeriod(data, listener) {
   })
 }
 
-module.exports.getSubjectsByPeriod = getSubjectsByPeriod
+module.exports.getSubjectsByQuarter = getSubjectsByQuarter
 module.exports.getSubjects = getSubjects

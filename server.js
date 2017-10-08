@@ -8,6 +8,7 @@ var fs = require('fs');
 
 var account = require('./account')
 var imko = require('./imko')
+var jko = require('./jko')
 
 const app = express()
 const port = 3000;
@@ -111,12 +112,39 @@ app.post('/GetIMKOSubjects/', (request, response) => {
     }
   })
 })
-app.post('/GetIMKOSubjectsByPeriod/', (request, response) => {
+app.post('/GetIMKOSubjectsByQuarter/', (request, response) => {
   var data = request.body
   updateCookies(data, function(result) {
     if(result.success === true) {
       var user = users[data.pin]
-      imko.getSubjectsByPeriod({school: user.school, quarterID: data.quarterID, childID: data.childID, jar: user.jar}, response)
+      imko.getSubjectsByQuarter({school: user.school, quarterID: data.quarterID, childID: data.childID, jar: user.jar}, response)
+    }
+    else {
+      response.send(JSON.stringify(result))
+    }
+  })
+})
+
+app.post('/GetJKOSubjects/', (request, response) => {
+  var data = request.body
+  updateCookies(data, function(result) {
+    if(result.success === true) {
+      var user = users[data.pin]
+      jko.getSubjects({school: user.school, childID: data.childID, classID: data.classID, jar:user.jar}, response)
+    }
+    else {
+      response.send(JSON.stringify(result))
+    }
+  })
+})
+
+app.post('/GetJKOSubjectsByQuarter/', (request, response) => {
+  var data = request.body
+  updateCookies(data, function(result) {
+    if(result.success === true) {
+      var user = users[data.pin]
+      jko.getSubjectsByQuarter({school: user.school, childID: data.childID, classID: data.classID, quarterID: data.quarterID,
+        jar:user.jar}, response)
     }
     else {
       response.send(JSON.stringify(result))
