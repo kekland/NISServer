@@ -1,50 +1,32 @@
 {
-
   "name": "nis-api",
   "version": "1.0.0",
   "description": "API for NIS",
-
   "engines": {
     "node": "6.11.4"
   },
-
   "main": "index.js",
-
   "scripts": {
     "start": "node index.js"
   },
-
   "dependencies": {
-
     "body-parser": "^1.18.2",
-
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.4",
     "express": "^4.16.1",
-
     "jsonfile": "^4.0.0",
-
     "request": "^2.83.0",
-
-    "unirest": "^0.5.1"
-  
+    "unirest": "^0.5.1",
+    "uuid": "^3.1.0"
   },
-  "devDependencies": {
-
-  },
+  "devDependencies": {},
   "repository": {
-    
     "type": "git",
-    
     "url": "git+https://github.com/kekland/NISServer.git"
-  
   },
-
   "keywords": [
-    
     "nis"
-  
   ],
-  
   "author": "kekland (vk.com/kekland322)",
-  
   "license": "MIT"
 }
