@@ -116,7 +116,7 @@ app.post('/GetIMKOSubjects/', (request, response) => {
   })
 })
 
-app.post('/GetIMKOSubjectsByQuarter/', (request, response) => {
+app.post('/GetIMKOSubjectsForQuarter/', (request, response) => {
   var data = request.body
   updateCookies(data, function(result) {
     if(result.success === true) {
@@ -142,7 +142,7 @@ app.post('/GetJKOSubjects/', (request, response) => {
   })
 })
 
-app.post('/GetJKOSubjectsByQuarter/', (request, response) => {
+app.post('/GetJKOSubjectsForQuarter/', (request, response) => {
   var data = request.body
   updateCookies(data, function(result) {
     if(result.success === true) {
@@ -209,6 +209,7 @@ app.post('/CheckCredentials/', (request, response) => {
 app.post('/GetPasswordStrength/', (request, response) => {
   misc.getPasswordStrength(request, response)
 })
+
 //Admin functions
 app.get('/Users/', (request, response) => {
 	var result = ""
