@@ -1,13 +1,74 @@
 const express = require('express')
+
 var bodyParser = require('body-parser')
 var unirest = require('unirest')
+var jsonfile = require('jsonfile');
 
-const account = require('./account')
-const login = require('./login')
+var fs = require('fs');
+
+var account = require('./account')
+var imko = require('./imko')
+
 const app = express()
 const port = 3000;
 
-const users = {}
+var users = {}
+
+function exitHandler() {
+  fs.writeFileSync('./data/data.json', JSON.stringify(users))
+  process.exit()
+}
+
+process.on('exit', exitHandler.bind(null));
+process.on('SIGINT', exitHandler.bind(null));
+process.on('SIGUSR1', exitHandler.bind(null));
+process.on('SIGUSR2', exitHandler.bind(null));
+
+console.log('Initializing server')
+console.log('Loading data')
+
+users = JSON.parse(fs.readFileSync('./data/data.json', 'utf-8'))
+
+console.log('Finished loading data')
+
+function updateCookies(data, listener) {
+  var user = users[data.pin]
+  if(user == undefined) {
+    listener({success:false, message:'User did not log-in'})
+    return
+  }
+  else if(user.password != data.password) {
+    listener({success:false, message:'Incorrect credentials'})
+    return
+  }
+
+  account.updateCookies(user, function(result) {
+    if(result.success === true) {
+      var time = getTime()
+      users[result.pin] = {
+        pin: result.pin,
+        password: result.password,
+        school: result.school,
+        role: result.role,
+        roles: result.roles,
+        locale: result.locale,
+        jar: result.jar,
+        loginTime: time,
+        raw: JSON.stringify(result)
+      }
+    }
+    listener(result)
+  })
+}
+
+function getTime() {
+  var time = new Date();
+  var timedata =
+    ("0" + time.getHours()).slice(-2)   + ":" +
+    ("0" + time.getMinutes()).slice(-2) + ":" +
+    ("0" + time.getSeconds()).slice(-2);
+  return timedata
+}
 
 //Body parsers
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -17,92 +78,56 @@ app.use((request, response, next) => {
   next()
 })
 
-//Login functions
-app.post('/Login/', (request, response) => {
-	const data = request.body
-  var j = unirest.jar()
-
-	account.LoginHandler(unirest, j, {pin: data.pin, password: data.pass,
-		school: data.school, locale: data.locale},
-		function callback(result, jar) {
-      jar.add('Culture=' + data.locale, data.school)
-      jar.add('lang=' + data.locale, data.school)
-
-			if(result.success === true) {
-				users[data.pin] = {
-						pin: data.pin,
-						password: data.pass,
-						school: data.school,
-						locale: data.locale,
-						cookies:jar
-				}
-			}
-
-			response.end(JSON.stringify(result))
-	})
-})
-
-app.post('/GetRoles/', (request, response) => {
-	const data = request.body
-	var user = users[data.pin]
-
-	account.GetRolesHandler(unirest, user.cookies, {school:user.school},
-		function callback(result, jar) {
-			if(result.success === true) {
-        users[data.pin].cookies = jar
-				response.end(JSON.stringify(result.data))
-			}
-	})
-})
-
-app.post('/LoginWithRole/', (request, response) => {
-  const data = request.body
-  var user = users[data.pin]
-
-  account.LoginWithRoleHandler(unirest, user.cookies, {school:user.school, role:data.role, password:user.password},
-    function callback(result, jar) {
-      if(result.success === true) {
-        users[data.pin].cookies = jar;
-        response.end(JSON.stringify(result))
-      }
-    })
-})
-
 //Public functions
-app.post('/FullLogin/', (request, response) => {
-  const data = request.body
-  var j = unirest.jar()
-
-  login.FullLoginHandler(unirest, {pin: data.pin, pass: data.pass,
-		school: data.school, locale: data.locale},
+app.post('/Login/', (request, response) => {
+  account.fullLogin(request, response,
     function callback(result) {
-      var time = new Date();
-      var timedata =
-      ("0" + time.getHours()).slice(-2)   + ":" +
-      ("0" + time.getMinutes()).slice(-2) + ":" +
-      ("0" + time.getSeconds()).slice(-2);
-
-      users[data.pin] = {
-          pin: data.pin,
-          password: data.pass,
-          school: data.school,
-          locale: data.locale,
-          cookies:result.CookieJar,
-          time:timedata
+      if(result.success === true) {
+        var time = getTime()
+        users[result.pin] = {
+          pin: result.pin,
+          password: result.password,
+          school: result.school,
+          role: result.role,
+          roles: result.roles,
+          locale: result.locale,
+          jar: result.jar,
+          loginTime: time
+          //raw: JSON.stringify(result)
+        }
       }
-      response.end(JSON.stringify(result))
     })
+})
+
+app.post('/GetIMKOSubjects/', (request, response) => {
+  var data = request.body
+  updateCookies(data, function(result) {
+    if(result.success === true) {
+      var user = users[data.pin]
+      imko.getSubjects({school: user.school, childID: data.childID, jar: user.jar}, response)
+    }
+    else {
+      response.send(JSON.stringify(result))
+    }
+  })
+})
+app.post('/GetIMKOSubjectsByPeriod/', (request, response) => {
+  var data = request.body
+  updateCookies(data, function(result) {
+    if(result.success === true) {
+      var user = users[data.pin]
+      imko.getSubjectsByPeriod({school: user.school, quarterID: data.quarterID, childID: data.childID, jar: user.jar}, response)
+    }
+    else {
+      response.send(JSON.stringify(result))
+    }
+  })
 })
 
 //Admin functions
 app.get('/Users/', (request, response) => {
 	var result = ""
-  var time = new Date();
-  var timedata =
-    ("0" + time.getHours()).slice(-2)   + ":" +
-    ("0" + time.getMinutes()).slice(-2) + ":" +
-    ("0" + time.getSeconds()).slice(-2);
-
+  var timedata = getTime()
   result += '<html><body><h1> Current Time : ' + timedata + ' </h1><hr>'
 	for(key in users) {
 		var obj = users[key]
@@ -110,11 +135,13 @@ app.get('/Users/', (request, response) => {
     result += '<p>Password: ' + obj.password + '</p>'
     result += '<p>School: ' + obj.school + '</p>'
     result += '<p>Locale: ' + obj.locale + '</p>'
-    result += '<p>Time: ' + obj.time + '</p>'
+    result += '<p>Time: ' + obj.loginTime + '</p>'
+    result += '<p>Role: ' + obj.role + '</p>'
+    result += '<p>Raw: \n' + obj.raw + '</p>'
     result += '<hr>'
 	}
   result += '</body></html>'
-	response.end(result)
+	response.send(result)
 })
 
 app.get('/', (request, response) => {
@@ -123,7 +150,7 @@ app.get('/', (request, response) => {
   text += '<a href="/Users/">/Users/ : Get users information</a>'
 
   text += '</body></html>'
-  response.end(text)
+  response.send(text)
 })
 
 app.use((err, request, response, next) => {
