@@ -96,21 +96,23 @@ app.post('/Login/', (request, response) => {
   console.log('1')
   account.fullLogin(request, response,
     function callback (result) {
-      if (result.success === true) {
-        var time = getTime()
-        users[result.id] = {
-          pin: result.pin,
-          password: result.password,
-          school: result.school,
-          schoolID: result.schoolID,
-          role: result.role,
-          roles: result.roles,
-          locale: result.locale,
-          jar: result.jar,
-          loginTime: time
-          // raw: JSON.stringify(result)
+      if (result.success === true && request.cookies.loginID === undefined) {
+        var user = users[request.cookies.loginID]
+        if(user == undefined) {
+          var time = getTime()
+          users[result.id] = {
+            pin: result.pin,
+            password: result.password,
+            school: result.school,
+            schoolID: result.schoolID,
+            role: result.role,
+            roles: result.roles,
+            locale: result.locale,
+            jar: result.jar,
+            loginTime: time
+            // raw: JSON.stringify(result)
+          }
         }
-
       }
     })
 })
@@ -119,7 +121,7 @@ app.post('/IMKO/GetIMKOSubjects/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
     if(result.success === true) {
-      var user = users[data.cookies.loginID]
+      var user = users[request.cookies.loginID]
       imko.getSubjects({school: user.school, childID: data.childID, jar: user.jar}, response)
     }
     else {
@@ -132,7 +134,7 @@ app.post('/IMKO/GetIMKOSubjectsForQuarter/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
     if(result.success === true) {
-      var user = users[data.cookies.loginID]
+      var user = users[request.cookies.loginID]
       imko.getSubjectsByQuarter({school: user.school, quarterID: data.quarterID, childID: data.childID, jar: user.jar}, response)
     }
     else {
@@ -145,7 +147,7 @@ app.post('/JKO/GetJKOSubjects/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
     if(result.success === true) {
-      var user = users[data.cookies.loginID]
+      var user = users[request.cookies.loginID]
       jko.getSubjects({school: user.school, childID: data.childID, classID: data.classID, jar:user.jar}, response)
     }
     else {
@@ -158,7 +160,7 @@ app.post('/JKO/GetJKOSubjectsForQuarter/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
     if(result.success === true) {
-      var user = users[data.cookies.loginID]
+      var user = users[request.cookies.loginID]
       jko.getSubjectsByQuarter({school: user.school, childID: data.childID, classID: data.classID, quarterID: data.quarterID,
         jar:user.jar}, response)
     }
@@ -172,7 +174,7 @@ app.post('/IMKO/GetIMKOGoals/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
     if(result.success === true) {
-      var user = users[data.cookies.loginID]
+      var user = users[request.cookies.loginID]
       imkogoals.getGoals({school: user.school, childID: data.childID, quarterID: data.quarterID, subjectID: data.subjectID,
         jar:user.jar}, response)
     }
@@ -185,8 +187,8 @@ app.post('/IMKO/GetIMKOGoals/', (request, response) => {
 app.post('/JKO/GetJKOGoals/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
-    if(result.success === true) {
-      var user = users[data.cookies.loginID]
+    if(result.success === true) 
+      var user = users[request.cookies.loginID]
       jkogoals.getGoals({school: user.school, topicEvaluationID: data.topicEvaluationID,
         quarterEvaluationID: data.quarterEvaluationID, journalID: data.journalID,
         jar:user.jar}, response)
@@ -199,8 +201,8 @@ app.post('/JKO/GetJKOGoals/', (request, response) => {
 
 app.post('/Data/ChangeLocale/', (request, response) => {
   var data = request.body
-  if(data.pin != undefined) {
-      var user = users[data.cookies.loginID]
+  if(data.pin != undefined) 
+    var user = users[request.cookies.loginID]
     if(user.password == data.password) {
       users[data.pin].locale = data.locale
       response.send(JSON.stringify({success:true}))
