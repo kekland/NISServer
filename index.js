@@ -54,7 +54,7 @@ function updateCookies(data, listener) {
   account.updateCookies(user, function(result) {
     if(result.success === true) {
       var time = getTime()
-      users[data.cookies.uuid] = {
+      users[uuid] = {
         pin: result.pin,
         password: result.password,
         school: result.school,
@@ -235,6 +235,7 @@ app.get('/Users/', (request, response) => {
     result += '<p>Locale: ' + obj.locale + '</p>'
     result += '<p>Time: ' + obj.loginTime + '</p>'
     result += '<p>Role: ' + obj.role + '</p>'
+    result += '<p>LoginID: ' + key + '</p>'
     result += '<p>Raw: \n' + obj.raw + '</p>'
     result += '<hr>'
 	}
