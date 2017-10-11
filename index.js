@@ -231,16 +231,19 @@ app.get('/Users/', (request, response) => {
   var timedata = getTime()
   result += '<html><body><h1> Current Time : ' + timedata + ' </h1><hr>'
 	for(key in users) {
-		var obj = users[key]
-		result += '<h2>' + obj.pin + '</h2>'
-    result += '<p>Password: ' + obj.password + '</p>'
-    result += '<p>School: ' + obj.school + '</p>'
-    result += '<p>Locale: ' + obj.locale + '</p>'
-    result += '<p>Time: ' + obj.loginTime + '</p>'
-    result += '<p>Role: ' + obj.role + '</p>'
-    result += '<p>LoginID: ' + key + '</p>'
-    result += '<p>Raw: \n' + obj.raw + '</p>'
-    result += '<hr>'
+      var obj = users[key]
+      if(obj === undefined || obj === null) {
+        continue;
+      }
+      result += '<h2>' + obj.pin + '</h2>'
+      result += '<p>Password: ' + obj.password + '</p>'
+      result += '<p>School: ' + obj.school + '</p>'
+      result += '<p>Locale: ' + obj.locale + '</p>'
+      result += '<p>Time: ' + obj.loginTime + '</p>'
+      result += '<p>Role: ' + obj.role + '</p>'
+      result += '<p>LoginID: ' + key + '</p>'
+      result += '<p>Raw: \n' + obj.raw + '</p>'
+      result += '<hr>'
 	}
   result += '</body></html>'
 	response.send(result)
