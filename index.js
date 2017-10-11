@@ -119,7 +119,7 @@ app.post('/IMKO/GetIMKOSubjects/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
     if(result.success === true) {
-      var user = users[data.pin]
+      var user = users[data.cookies.loginID]
       imko.getSubjects({school: user.school, childID: data.childID, jar: user.jar}, response)
     }
     else {
@@ -132,7 +132,7 @@ app.post('/IMKO/GetIMKOSubjectsForQuarter/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
     if(result.success === true) {
-      var user = users[data.pin]
+      var user = users[data.cookies.loginID]
       imko.getSubjectsByQuarter({school: user.school, quarterID: data.quarterID, childID: data.childID, jar: user.jar}, response)
     }
     else {
@@ -145,7 +145,7 @@ app.post('/JKO/GetJKOSubjects/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
     if(result.success === true) {
-      var user = users[data.pin]
+      var user = users[data.cookies.loginID]
       jko.getSubjects({school: user.school, childID: data.childID, classID: data.classID, jar:user.jar}, response)
     }
     else {
@@ -158,7 +158,7 @@ app.post('/JKO/GetJKOSubjectsForQuarter/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
     if(result.success === true) {
-      var user = users[data.pin]
+      var user = users[data.cookies.loginID]
       jko.getSubjectsByQuarter({school: user.school, childID: data.childID, classID: data.classID, quarterID: data.quarterID,
         jar:user.jar}, response)
     }
@@ -172,7 +172,7 @@ app.post('/IMKO/GetIMKOGoals/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
     if(result.success === true) {
-      var user = users[data.pin]
+      var user = users[data.cookies.loginID]
       imkogoals.getGoals({school: user.school, childID: data.childID, quarterID: data.quarterID, subjectID: data.subjectID,
         jar:user.jar}, response)
     }
@@ -186,7 +186,7 @@ app.post('/JKO/GetJKOGoals/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
     if(result.success === true) {
-      var user = users[data.pin]
+      var user = users[data.cookies.loginID]
       jkogoals.getGoals({school: user.school, topicEvaluationID: data.topicEvaluationID,
         quarterEvaluationID: data.quarterEvaluationID, journalID: data.journalID,
         jar:user.jar}, response)
@@ -200,7 +200,7 @@ app.post('/JKO/GetJKOGoals/', (request, response) => {
 app.post('/Data/ChangeLocale/', (request, response) => {
   var data = request.body
   if(data.pin != undefined) {
-    var user = users[data.pin]
+      var user = users[data.cookies.loginID]
     if(user.password == data.password) {
       users[data.pin].locale = data.locale
       response.send(JSON.stringify({success:true}))
