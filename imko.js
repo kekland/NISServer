@@ -20,7 +20,7 @@ function getSubjects(data, response) {
         }
         finished += 1
         if(finished == 4) {
-          response.send(JSON.stringify(result))
+          response.send(JSON.stringify({success:true, data:result}))
         }
       }
       else {
