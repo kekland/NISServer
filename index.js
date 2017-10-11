@@ -96,7 +96,10 @@ app.post('/Login/', (request, response) => {
   console.log('1')
   account.fullLogin(request, response,
     function callback (result) {
-      if (result.success === true && request.cookies.loginID === undefined) {
+      if (result.success === true) {
+        if(request.cookies.loginID != undefined) {
+          users[request.cookies.loginID] = null;
+        }
         var time = getTime()
         users[result.id] = {
           pin: result.pin,
