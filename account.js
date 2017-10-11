@@ -221,9 +221,13 @@ function fullLogin(request, response, listener) {
     }
   }
   if(school == '-1') {
-    listener({success:false, message:'School must be in form of ID. You can find list in https://github.com/kekland/NISServer'})
+    var resp = {success:false, message:'School must be in form of ID. You can find list in https://github.com/kekland/NISServer'}
+    listener(resp)
+    response.send(JSON.stringify(resp))
     return
   }
+  
+  console.log(school)
 
   login({
       pin: data.pin,
@@ -270,10 +274,11 @@ function fullLogin(request, response, listener) {
                               role: role,
                               roles: resultRoles.roles,
                               locale: data.locale,
-                              jar: jarFinal,
                               children: resultChildren.data
                             }
                             response.send(JSON.stringify(endData))
+
+                            endData.jar = jarFinal
                             listener(endData)
                           } else {
                             response.send(JSON.stringify({

@@ -93,6 +93,7 @@ app.use((request, response, next) => {
 
 // Public functions
 app.post('/Login/', (request, response) => {
+  console.log('1')
   account.fullLogin(request, response,
     function callback (result) {
       if (result.success === true) {
