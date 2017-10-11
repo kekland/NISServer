@@ -97,22 +97,20 @@ app.post('/Login/', (request, response) => {
   account.fullLogin(request, response,
     function callback (result) {
       if (result.success === true && request.cookies.loginID === undefined) {
-        var user = users[request.cookies.loginID]
-        if(user == undefined) {
-          var time = getTime()
-          users[result.id] = {
-            pin: result.pin,
-            password: result.password,
-            school: result.school,
-            schoolID: result.schoolID,
-            role: result.role,
-            roles: result.roles,
-            locale: result.locale,
-            jar: result.jar,
-            loginTime: time
-            // raw: JSON.stringify(result)
-          }
+        var time = getTime()
+        users[result.id] = {
+          pin: result.pin,
+          password: result.password,
+          school: result.school,
+          schoolID: result.schoolID,
+          role: result.role,
+          roles: result.roles,
+          locale: result.locale,
+          jar: result.jar,
+          loginTime: time
+          // raw: JSON.stringify(result)
         }
+        
       }
     })
 })
@@ -187,7 +185,7 @@ app.post('/IMKO/GetIMKOGoals/', (request, response) => {
 app.post('/JKO/GetJKOGoals/', (request, response) => {
   var data = request.body
   updateCookies(request, function(result) {
-    if(result.success === true) 
+    if(result.success === true) {
       var user = users[request.cookies.loginID]
       jkogoals.getGoals({school: user.school, topicEvaluationID: data.topicEvaluationID,
         quarterEvaluationID: data.quarterEvaluationID, journalID: data.journalID,
@@ -201,7 +199,7 @@ app.post('/JKO/GetJKOGoals/', (request, response) => {
 
 app.post('/Data/ChangeLocale/', (request, response) => {
   var data = request.body
-  if(data.pin != undefined) 
+  if(data.pin != undefined) {
     var user = users[request.cookies.loginID]
     if(user.password == data.password) {
       users[data.pin].locale = data.locale
