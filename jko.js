@@ -1,5 +1,43 @@
 var unirest = require('unirest')
 
+function getSubjectsWithListener(data, listener) {
+  var subjects = []
+  var finished = 0
+  var failed = false
+
+  getStudentData(data, function(dataResult) {
+    for(var i = 1; i <= 4; i++) {
+      const quarter = i
+      var reqData = {
+        quarterID: quarter,
+        childID: dataResult.childID,
+        classID: dataResult.classID,
+        school: data.school,
+        jar: data.jar
+      }
+      getSubjectsOnQuarter(reqData, function(result) {
+        var resultSubjects = result
+        if(resultSubjects.success === true) {
+          subjects[quarter - 1] = {
+            quarter: quarter,
+            data: resultSubjects.data
+          }
+          finished += 1
+          if(finished == 4) {
+            listener({success: true, data: subjects})
+          }
+        }
+        else {
+          if(!failed) {
+            failed = true;
+            listener(result)
+          }
+        }
+      })
+    }
+  })
+}
+
 function getSubjects(data, response) {
   var subjects = []
   var finished = 0
@@ -9,7 +47,7 @@ function getSubjects(data, response) {
       const quarter = i
       var reqData = {
         quarterID: quarter,
-        studentID: dataResult.studentID,
+        childID: dataResult.childID,
         classID: dataResult.classID,
         school: data.school,
         jar: data.jar
@@ -29,7 +67,7 @@ function getSubjects(data, response) {
         else {
           if(!failed) {
             failed = true;
-            response.send(JSON.stringify({success:false}))
+            response.send(JSON.stringify(result))
           }
         }
       })
@@ -43,7 +81,7 @@ function getSubjectsByQuarter(data, response) {
     const quarter = data.quarterID
     var reqData = {
       quarterID: quarter,
-      studentID: dataResult.studentID,
+      childID: dataResult.childID,
       classID: dataResult.classID,
       school: data.school,
       jar: data.jar
@@ -57,7 +95,7 @@ function getSubjectsByQuarter(data, response) {
 function getSubjectsOnQuarter(data, listener) {
   var requestData = {
     quarterID: data.quarterID,
-    studentID: data.studentID,
+    childID: data.childID,
     classID: data.classID,
     school: data.school,
     jar: data.jar
@@ -109,7 +147,7 @@ function getSubjectsOnQuarter(data, listener) {
 function getLink(data, listener) {
   var requestData = {
     periodId: data.quarterID,
-    studentId: data.studentID,
+    studentId: data.childID,
     klassId: data.classID
   }
 
@@ -183,9 +221,10 @@ function getChildDataByResponse(response) {
     }
   }
   return {
-    studentID: studentId,
+    childID: studentId,
     classID: classId
   }
 }
+module.exports.getSubjectsWithListener = getSubjectsWithListener
 module.exports.getSubjects = getSubjects
 module.exports.getSubjectsByQuarter = getSubjectsByQuarter

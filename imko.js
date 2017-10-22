@@ -1,5 +1,38 @@
 var unirest = require('unirest')
 
+function getSubjectsWithListener(data, listener) {
+  var result = []
+  var failed = false
+  var finished = 0
+  for(var i = 1; i <= 4; i++) {
+    var requestData = {
+      quarterID: i,
+      childID: data.childID,
+      school: data.school,
+      jar : data.jar
+    }
+    const quarter = i
+    getSubjectOnQuarter(requestData, function(reqResult) {
+      if(reqResult.success === true) {
+        result[quarter - 1] = {
+          quarter: quarter,
+          data: reqResult.data
+        }
+        finished += 1
+        if(finished == 4) {
+          listener({success: true, data: result})
+        }
+      }
+      else {
+        if(!failed) {
+          failed = true
+          listener(reqResult)
+        }
+      }
+    })
+  }
+}
+
 function getSubjects(data, response) {
   var result = []
   var failed = false
@@ -75,7 +108,7 @@ function getSubjectOnQuarter(data, listener) {
         listener({success:true, data:data})
       }
       else {
-        listener({success:false, message:response.message})
+        listener({success:false, message:response.ErrorMessage})
       }
     }
     else {
@@ -84,5 +117,6 @@ function getSubjectOnQuarter(data, listener) {
   })
 }
 
+module.exports.getSubjectsWithListener = getSubjectsWithListener
 module.exports.getSubjectsByQuarter = getSubjectsByQuarter
 module.exports.getSubjects = getSubjects

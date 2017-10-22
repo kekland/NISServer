@@ -21,8 +21,10 @@ const app = express()
 const port = process.env.PORT || 5000
 app.set('port', port)
 var users = {}
+var userspin = {}
 
 function exitHandler () {
+  console.log('Saving data')
   fs.writeFileSync('./data/data.json', JSON.stringify(users))
   process.exit()
 }
@@ -40,13 +42,113 @@ users = JSON.parse(fs.readFileSync('./data/data.json', 'utf-8'))
 
 console.log('Finished loading data')
 
+function setSubjectForUser(user) {
+
+  console.log('Updating user PIN: ' + user.pin)
+  var dataToSet = []
+  var failed = false
+  if(user.diary === 'IMKO') {
+    if(user.children != undefined) {
+
+      var finished = 0
+      for(var child of user.children) {
+        var childID = child.studentID
+        imko.getSubjectsWithListener(
+          {school: user.school, childID: childID, jar: user.jar}, (result) => {
+          if(result.success === true) {
+            dataToSet.push({childID: childID, data: result.data})
+            finished++
+            if(finished === user.children.length) {
+              users[user.id].subjectData = dataToSet;  
+              var time = getTime()
+              users[user.id].loginTime = time 
+            }
+          }
+          else {
+            return
+          }
+        })
+      }
+
+    }
+    else {
+      imko.getSubjectsWithListener({school: user.school, childID: '', jar: user.jar}, (result) => {
+        if(result.success === true) {
+          dataToSet.push({childID: 'null', data: result.data})
+          users[user.id].subjectData = dataToSet;
+          var time = getTime()
+          users[user.id].loginTime = time
+        }
+        else {
+          return
+        }
+      })
+    }
+  }
+  else {
+    if(user.children != null) {
+
+      var finished = 0
+      for(var child of user.children) {
+        var childID = child.studentID
+        var classID = child.classID
+        jko.getSubjectsWithListener(
+          {school: user.school, childID: childID, classID: classID, jar:user.jar}, (result) => {
+          if(result.success === true) {
+            dataToSet.push({childID: childID, data: result.data})
+            finished++
+            if(finished === user.children.length) {
+              users[user.id].subjectData = dataToSet;
+              var time = getTime()
+              users[user.id].loginTime = time
+            }
+          }
+          else {
+            return
+          }
+        })
+      }
+
+    }
+    else {
+      jko.getSubjectsWithListener({school: user.school, childID: '', classID: '', jar:user.jar}, (result) => {
+        if(result.success === true) {
+          dataToSet.push({childID: 'null', data: result.data})
+          users[user.id].subjectData = dataToSet;
+          var time = getTime()
+          users[user.id].loginTime = time
+        }
+        else {
+          return
+        }
+      })
+    }
+  }
+}
+
+var index = 0
+var minInterval = 10000;
+
+for(var key in users) {
+  index++
+  const user = users[key]
+
+  setTimeout(function() {
+    var interval = users.length * 1000
+    if(interval < minInterval) {
+      interval = minInterval;
+    }
+    setInterval(setSubjectForUser, minInterval, user)
+  }, index * 1000)
+}
+
 function updateCookies(data, listener) {
   var uuid = data.cookies.loginID
 
   console.log(uuid)
 
   var user = users[uuid]
-  if(user == undefined) {
+  if(user == undefined) {Сп
     listener({success:false, message:'User did not log-in'})
     return
   }
@@ -54,17 +156,8 @@ function updateCookies(data, listener) {
   account.updateCookies(user, function(result) {
     if(result.success === true) {
       var time = getTime()
-      users[uuid] = {
-        pin: result.pin,
-        password: result.password,
-        school: result.school,
-        role: result.role,
-        roles: result.roles,
-        locale: result.locale,
-        jar: result.jar,
-        loginTime: time,
-        raw: JSON.stringify(result)
-      }
+      users[uuid].jar = result.jar
+      users[uuid].loginTime = time
     }
     listener(result)
   })
@@ -91,26 +184,71 @@ app.use((request, response, next) => {
   next()
 })
 
+app.post('/GetSubjectData/', (request, response) => {
+  var data = request.body
+  updateCookies(request, function(result) {
+    if(result.success === true) {
+      var user = users[request.cookies.loginID]
+      var subjectData = user.subjectData
+      if(subjectData === undefined) {
+        setSubjectForUser(user)
+        response.send(JSON.stringify({success: true, data: 'null', message: 'Data has not been prepared yet. Please, update again.'}))
+      }
+      else {
+        response.send(JSON.stringify({success: true, data: user.subjectData}))
+      }
+    }
+    else {
+      response.send(JSON.stringify(result))
+    }
+  })
+})
+
 // Public functions
 app.post('/Login/', (request, response) => {
-  console.log('1')
+  if(userspin[request.body.pin] != undefined && userspin[request.body.pin] != null) {
+    var uuid = userspin[request.body.pin]
+    var user = users[uuid]
+
+    if(user.password != request.body.password || user.schoolID != request.body.school) {
+      response.send(JSON.stringify({
+        success: false,
+        message: 'Invalid PIN, Password, or incorrect school selected'
+      }))
+      return;
+    }
+
+    var resp = {
+      success: true,
+      id: uuid,
+      pin: user.pin,
+      password: user.password,
+      school: user.school,
+      schoolID: user.school,
+      role: user.role,
+      diary: user.diary,
+      roles: user.roles
+    }
+    if(user.chlidren != undefined) {
+      resp.children = user.children
+    }
+
+    response.cookie('loginID', uniqueID, {maxAge: 900000, httpOnly: true})
+    response.send(JSON.stringify(resp))
+  }
   account.fullLogin(request, response,
     function callback (result) {
       if (result.success === true && request.cookies.loginID === undefined) {
         var time = getTime()
-        users[result.id] = {
-          pin: result.pin,
-          password: result.password,
-          school: result.school,
-          schoolID: result.schoolID,
-          role: result.role,
-          roles: result.roles,
-          locale: result.locale,
-          jar: result.jar,
-          loginTime: time
-          // raw: JSON.stringify(result)
+        var user = result
+        user.loginTime = time;
+        users[result.id] = user
+
+        var interval = users.length * 1000
+        if(interval < minInterval) {
+          interval = minInterval;
         }
-        
+        setInterval(setSubjectForUser, interval, users[result.id])
       }
     })
 })
@@ -199,21 +337,43 @@ app.post('/JKO/GetJKOGoals/', (request, response) => {
 
 app.post('/Data/ChangeLocale/', (request, response) => {
   var data = request.body
-  if(data.pin != undefined) {
-    var user = users[request.cookies.loginID]
-    if(user.password == data.password) {
-      users[data.pin].locale = data.locale
-      response.send(JSON.stringify({success:true}))
-    }
-    else {
-      response.send(JSON.stringify({success:false}))
-    }
+  var user = users[request.cookies.loginID]
+  if(user !== undefined) {
+    users[request.cookies.loginID].locale = data.locale
+    response.send(JSON.stringify({success: true}))
   }
   else {
-    response.send(JSON.stringify({success:false}))
+    response.send(JSON.stringify({success: false, message: 'User not found in database'}))
   }
 })
 
+app.post('/Data/ChangeDiary/', (request, response) => {
+  var data = request.body
+  var user = users[request.cookies.loginID]
+  if(user !== undefined) {
+    if(data.diary != 'IMKO' && data.diary != 'JKO') {
+      response.send(JSON.stringify({success: false, message: 'Invalid diary type'}))
+      return;
+    }
+    users[request.cookies.loginID].diary = data.diary
+    response.send(JSON.stringify({success: true}))
+  }
+  else {
+    response.send(JSON.stringify({success: false, message: 'User not found in database'}))
+  }
+})
+
+app.post('/Notifications/LinkFCMToken', (request, response) => {
+  var data = request.body
+  var user = users[request.cookies.loginID]
+  if(user !== undefined) {
+    users[request.cookies.loginID].fcm.token = data.token
+    response.send(JSON.stringify({success: true}))
+  }
+  else {
+    response.send(JSON.stringify({success: false, message: 'User not found in database'}))
+  }
+})
 app.post('/Misc/CheckCredentials/', (request, response) => {
   account.checkCredentials(request, response)
 })
@@ -236,6 +396,7 @@ app.get('/Users/', (request, response) => {
     result += '<p>Time: ' + obj.loginTime + '</p>'
     result += '<p>Role: ' + obj.role + '</p>'
     result += '<p>LoginID: ' + key + '</p>'
+    result += '<p>Subject data: \n' + JSON.stringify(obj.subjectData) + '\n </p>'
     result += '<p>Raw: \n' + obj.raw + '</p>'
     result += '<hr>'
 	}

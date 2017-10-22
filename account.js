@@ -226,6 +226,13 @@ function fullLogin(request, response, listener) {
     response.send(JSON.stringify(resp))
     return
   }
+
+  if(data.diary === undefined || (data.diary != 'IMKO' && data.diary != 'JKO')) {
+    var resp = {success:false, message:'Diary is not given or incorrect. You can find requirements in https://github.com/kekland/NISServer'}
+    listener(resp)
+    response.send(JSON.stringify(resp))
+    return
+  }
   
   console.log(school)
 
@@ -274,6 +281,7 @@ function fullLogin(request, response, listener) {
                               role: role,
                               roles: resultRoles.roles,
                               locale: data.locale,
+                              diary: data.diary,
                               children: resultChildren.data
                             }
                             response.send(JSON.stringify(endData))
@@ -300,6 +308,7 @@ function fullLogin(request, response, listener) {
                         schoolID: data.school,
                         role: role,
                         roles: resultRoles.roles,
+                        diary: data.diary,
                         locale: data.locale
                       }
                       response.send(JSON.stringify(endData))
