@@ -238,7 +238,10 @@ app.post('/Login/', (request, response) => {
   }
   account.fullLogin(request, response,
     function callback (result) {
-      if (result.success === true && request.cookies.loginID === undefined) {
+      if (result.success === true) {
+        if(request.cookies.loginID != undefined) {
+          users[request.cookies.loginID] = null;
+        }
         var time = getTime()
         var user = result
         user.loginTime = time;
@@ -388,6 +391,7 @@ app.get('/Users/', (request, response) => {
   var timedata = getTime()
   result += '<html><body><h1> Current Time : ' + timedata + ' </h1><hr>'
 	for(key in users) {
+<<<<<<< HEAD
 		var obj = users[key]
 		result += '<h2>' + obj.pin + '</h2>'
     result += '<p>Password: ' + obj.password + '</p>'
@@ -399,6 +403,21 @@ app.get('/Users/', (request, response) => {
     result += '<p>Subject data: \n' + JSON.stringify(obj.subjectData) + '\n </p>'
     result += '<p>Raw: \n' + obj.raw + '</p>'
     result += '<hr>'
+=======
+      var obj = users[key]
+      if(obj === undefined || obj === null) {
+        continue;
+      }
+      result += '<h2>' + obj.pin + '</h2>'
+      result += '<p>Password: ' + obj.password + '</p>'
+      result += '<p>School: ' + obj.school + '</p>'
+      result += '<p>Locale: ' + obj.locale + '</p>'
+      result += '<p>Time: ' + obj.loginTime + '</p>'
+      result += '<p>Role: ' + obj.role + '</p>'
+      result += '<p>LoginID: ' + key + '</p>'
+      result += '<p>Raw: \n' + obj.raw + '</p>'
+      result += '<hr>'
+>>>>>>> ece26292b8dff69ee1658292b599ee080e39c694
 	}
   result += '</body></html>'
 	response.send(result)
