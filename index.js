@@ -47,83 +47,87 @@ function setSubjectForUser(user) {
   console.log('Updating user PIN: ' + user.pin)
   var dataToSet = []
   var failed = false
-  if(user.diary === 'IMKO') {
-    if(user.children != undefined) {
+  account.updateCookies(user, (cookieResult) => {
+    user.jar = cookieResult.jar
+    
+    if(user.diary === 'IMKO') {
+      if(user.children != undefined) {
 
-      var finished = 0
-      for(var child of user.children) {
-        var childID = child.studentID
-        imko.getSubjectsWithListener(
-          {school: user.school, childID: childID, jar: user.jar}, (result) => {
-          if(result.success === true) {
-            dataToSet.push({childID: childID, data: result.data})
-            finished++
-            if(finished === user.children.length) {
-              users[user.id].subjectData = dataToSet;  
-              var time = getTime()
-              users[user.id].loginTime = time 
+        var finished = 0
+        for(var child of user.children) {
+          var childID = child.studentID
+          imko.getSubjectsWithListener(
+            {school: user.school, childID: childID, jar: user.jar}, (result) => {
+            if(result.success === true) {
+              dataToSet.push({childID: childID, data: result.data})
+              finished++
+              if(finished === user.children.length) {
+                users[user.id].subjectData = dataToSet;  
+                var time = getTime()
+                users[user.id].loginTime = time 
+              }
             }
+            else {
+              return
+            }
+          })
+        }
+
+      }
+      else {
+        imko.getSubjectsWithListener({school: user.school, childID: '', jar: user.jar}, (result) => {
+          if(result.success === true) {
+            dataToSet.push({childID: 'null', data: result.data})
+            users[user.id].subjectData = dataToSet;
+            var time = getTime()
+            users[user.id].loginTime = time
           }
           else {
             return
           }
         })
       }
-
     }
     else {
-      imko.getSubjectsWithListener({school: user.school, childID: '', jar: user.jar}, (result) => {
-        if(result.success === true) {
-          dataToSet.push({childID: 'null', data: result.data})
-          users[user.id].subjectData = dataToSet;
-          var time = getTime()
-          users[user.id].loginTime = time
-        }
-        else {
-          return
-        }
-      })
-    }
-  }
-  else {
-    if(user.children != null) {
+      if(user.children != null) {
 
-      var finished = 0
-      for(var child of user.children) {
-        var childID = child.studentID
-        var classID = child.classID
-        jko.getSubjectsWithListener(
-          {school: user.school, childID: childID, classID: classID, jar:user.jar}, (result) => {
-          if(result.success === true) {
-            dataToSet.push({childID: childID, data: result.data})
-            finished++
-            if(finished === user.children.length) {
-              users[user.id].subjectData = dataToSet;
-              var time = getTime()
-              users[user.id].loginTime = time
+        var finished = 0
+        for(var child of user.children) {
+          var childID = child.studentID
+          var classID = child.classID
+          jko.getSubjectsWithListener(
+            {school: user.school, childID: childID, classID: classID, jar:user.jar}, (result) => {
+            if(result.success === true) {
+              dataToSet.push({childID: childID, data: result.data})
+              finished++
+              if(finished === user.children.length) {
+                users[user.id].subjectData = dataToSet;
+                var time = getTime()
+                users[user.id].loginTime = time
+              }
             }
+            else {
+              return
+            }
+          })
+        }
+
+      }
+      else {
+        jko.getSubjectsWithListener({school: user.school, childID: '', classID: '', jar:user.jar}, (result) => {
+          if(result.success === true) {
+            dataToSet.push({childID: 'null', data: result.data})
+            users[user.id].subjectData = dataToSet;
+            var time = getTime()
+            users[user.id].loginTime = time
           }
           else {
             return
           }
         })
       }
-
     }
-    else {
-      jko.getSubjectsWithListener({school: user.school, childID: '', classID: '', jar:user.jar}, (result) => {
-        if(result.success === true) {
-          dataToSet.push({childID: 'null', data: result.data})
-          users[user.id].subjectData = dataToSet;
-          var time = getTime()
-          users[user.id].loginTime = time
-        }
-        else {
-          return
-        }
-      })
-    }
-  }
+  })
 }
 
 var index = 0
@@ -148,7 +152,7 @@ function updateCookies(data, listener) {
   console.log(uuid)
 
   var user = users[uuid]
-  if(user == undefined) {Сп
+  if(user == undefined) {
     listener({success:false, message:'User did not log-in'})
     return
   }
@@ -391,7 +395,6 @@ app.get('/Users/', (request, response) => {
   var timedata = getTime()
   result += '<html><body><h1> Current Time : ' + timedata + ' </h1><hr>'
 	for(key in users) {
-<<<<<<< HEAD
 		var obj = users[key]
 		result += '<h2>' + obj.pin + '</h2>'
     result += '<p>Password: ' + obj.password + '</p>'
@@ -403,21 +406,6 @@ app.get('/Users/', (request, response) => {
     result += '<p>Subject data: \n' + JSON.stringify(obj.subjectData) + '\n </p>'
     result += '<p>Raw: \n' + obj.raw + '</p>'
     result += '<hr>'
-=======
-      var obj = users[key]
-      if(obj === undefined || obj === null) {
-        continue;
-      }
-      result += '<h2>' + obj.pin + '</h2>'
-      result += '<p>Password: ' + obj.password + '</p>'
-      result += '<p>School: ' + obj.school + '</p>'
-      result += '<p>Locale: ' + obj.locale + '</p>'
-      result += '<p>Time: ' + obj.loginTime + '</p>'
-      result += '<p>Role: ' + obj.role + '</p>'
-      result += '<p>LoginID: ' + key + '</p>'
-      result += '<p>Raw: \n' + obj.raw + '</p>'
-      result += '<hr>'
->>>>>>> ece26292b8dff69ee1658292b599ee080e39c694
 	}
   result += '</body></html>'
 	response.send(result)
