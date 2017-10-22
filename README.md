@@ -48,14 +48,14 @@ _There are three locales available : ru-RU, kk-KZ, en-US_
 
 ## Subjects
 ### /GetSubjectsData/ ###
-Does not require any parameters
 
-Will respond with subject information for all 4 quarters
+Will respond with subject information for all 4 quarters.
 
-Beware : this method can contain outdated information ranging from 10 minutes to 1 hour
+Beware : this method can contain outdated information with latency ranging from 10 minutes to 1 hour.
 
 Also, this method can user Firebase Cloud Messaging to send push notifications. Use method _/Notifications/LinkFCMToken_ to link Firebase token to user.
 
+Does not require any parameters.
 
 #### Sample response : ####
 ```
