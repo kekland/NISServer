@@ -47,7 +47,7 @@ _There are three locales available : ru-RU, kk-KZ, en-US_
 ```
 
 ## Subjects
-### /GetSubjectsData/ ###
+### /GetSubjectData/ ###
 
 Will respond with subject information for all 4 quarters.
 
