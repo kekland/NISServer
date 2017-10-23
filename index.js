@@ -26,6 +26,7 @@ var userspin = {}
 function exitHandler () {
   console.log('Saving data')
   fs.writeFileSync('./data/data.json', JSON.stringify(users))
+  fs.writeFileSync('./data/datapin.json', JSON.stringify(userspin))
   process.exit()
 }
 
@@ -39,6 +40,7 @@ console.log('Initializing server')
 console.log('Loading data')
 
 users = JSON.parse(fs.readFileSync('./data/data.json', 'utf-8'))
+userspin = JSON.parse(fs.readFileSync('./data/datapin.json', 'utf-8'))
 
 console.log('Finished loading data')
 
