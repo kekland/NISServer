@@ -50,97 +50,99 @@ function setSubjectForUser(user) {
   var dataToSet = []
   var failed = false
   account.updateCookies(user, (cookieResult) => {
-    user.jar = cookieResult.jar
-    
-    if(user.diary === 'IMKO') {
-      if(user.children != undefined) {
+    if(cookieResult.success === true) {
+      user.jar = cookieResult.jar
 
-        var finished = 0
-        for(var child of user.children) {
-          var childID = child.studentID
-          imko.getSubjectsWithListener(
-            {school: user.school, childID: childID, jar: user.jar}, (result) => {
-            if(result.success === true) {
-              dataToSet.push({childID: childID, data: result.data})
-              finished++
-              if(finished === user.children.length) {
-                users[user.id].subjectData = dataToSet;  
-                var time = getTime()
-                users[user.id].loginTime = time 
+      if(user.diary === 'IMKO') {
+        if(user.children != undefined) {
+  
+          var finished = 0
+          for(var child of user.children) {
+            var childID = child.studentID
+            imko.getSubjectsWithListener(
+              {school: user.school, childID: childID, jar: user.jar}, (result) => {
+              if(result.success === true) {
+                dataToSet.push({childID: childID, data: result.data})
+                finished++
+                if(finished === user.children.length) {
+                  users[user.id].subjectData = dataToSet;  
+                  var time = getTime()
+                  users[user.id].loginTime = time 
+                }
               }
+              else {
+                return
+              }
+            })
+          }
+  
+        }
+        else {
+          imko.getSubjectsWithListener({school: user.school, childID: '', jar: user.jar}, (result) => {
+            if(result.success === true) {
+              dataToSet.push({childID: 'null', data: result.data})
+              users[user.id].subjectData = dataToSet;
+              var time = getTime()
+              users[user.id].loginTime = time
             }
             else {
               return
             }
           })
         }
-
       }
       else {
-        imko.getSubjectsWithListener({school: user.school, childID: '', jar: user.jar}, (result) => {
-          if(result.success === true) {
-            dataToSet.push({childID: 'null', data: result.data})
-            users[user.id].subjectData = dataToSet;
-            var time = getTime()
-            users[user.id].loginTime = time
-          }
-          else {
-            return
-          }
-        })
-      }
-    }
-    else {
-      if(user.children != null) {
-
-        var finished = 0
-        for(var child of user.children) {
-          var childID = child.studentID
-          var classID = child.classID
-          jko.getSubjectsWithListener(
-            {school: user.school, childID: childID, classID: classID, jar:user.jar}, (result) => {
-            if(result.success === true) {
-              dataToSet.push({childID: childID, data: result.data})
-              finished++
-              if(finished === user.children.length) {
-                users[user.id].subjectData = dataToSet;
-                var time = getTime()
-                users[user.id].loginTime = time
+        if(user.children != null) {
+  
+          var finished = 0
+          for(var child of user.children) {
+            var childID = child.studentID
+            var classID = child.classID
+            jko.getSubjectsWithListener(
+              {school: user.school, childID: childID, classID: classID, jar:user.jar}, (result) => {
+              if(result.success === true) {
+                dataToSet.push({childID: childID, data: result.data})
+                finished++
+                if(finished === user.children.length) {
+                  users[user.id].subjectData = dataToSet;
+                  var time = getTime()
+                  users[user.id].loginTime = time
+                }
               }
+              else {
+                return
+              }
+            })
+          }
+  
+        }
+        else {
+          jko.getSubjectsWithListener({school: user.school, childID: '', classID: '', jar:user.jar}, (result) => {
+            if(result.success === true) {
+              dataToSet.push({childID: 'null', data: result.data})
+              users[user.id].subjectData = dataToSet;
+              var time = getTime()
+              users[user.id].loginTime = time
             }
             else {
               return
             }
           })
         }
-
-      }
-      else {
-        jko.getSubjectsWithListener({school: user.school, childID: '', classID: '', jar:user.jar}, (result) => {
-          if(result.success === true) {
-            dataToSet.push({childID: 'null', data: result.data})
-            users[user.id].subjectData = dataToSet;
-            var time = getTime()
-            users[user.id].loginTime = time
-          }
-          else {
-            return
-          }
-        })
       }
     }
   })
 }
 
 var index = 0
-var minInterval = 60000;
+var minInterval = 10000;
 
 for(var key in users) {
   index++
   const user = users[key]
 
   setTimeout(function() {
-    var interval = users.length * 1000
+    var interval = Object.keys(users).length * 1000
     if(interval < minInterval) {
       interval = minInterval;
     }
@@ -239,8 +241,9 @@ app.post('/Login/', (request, response) => {
       resp.children = user.children
     }
 
-    response.cookie('loginID', uniqueID, {maxAge: 900000, httpOnly: true})
+    response.cookie('loginID', uuid, {maxAge: 900000, httpOnly: true})
     response.send(JSON.stringify(resp))
+    return;
   }
   account.fullLogin(request, response,
     function callback (result) {
@@ -253,7 +256,7 @@ app.post('/Login/', (request, response) => {
         user.loginTime = time;
         users[result.id] = user
 
-        var interval = users.length * 1000
+        var interval = Object.keys(users).length * 1000
         if(interval < minInterval) {
           interval = minInterval;
         }
