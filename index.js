@@ -135,7 +135,7 @@ function setSubjectForUser(user) {
 }
 
 var index = 0
-var minInterval = 10000;
+var minInterval = 60000;
 
 for(var key in users) {
   index++
