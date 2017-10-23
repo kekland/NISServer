@@ -118,7 +118,7 @@ function setSubjectForUser(user) {
   
         }
         else {
-          jko.getSubjectsWithListener({school: user.school, childID: '', classID: '', jar:user.jar}, (result) => {
+          jko.getSubjectsWithListener({school: user.school, jar:user.jar}, (result) => {
             if(result.success === true) {
               dataToSet.push({childID: 'null', data: result.data})
               users[user.id].subjectData = dataToSet;
@@ -136,7 +136,7 @@ function setSubjectForUser(user) {
 }
 
 var index = 0
-var minInterval = 60000;
+var minInterval = 10000;
 
 for(var key in users) {
   index++
@@ -205,6 +205,29 @@ app.post('/GetSubjectData/', (request, response) => {
       }
       else {
         response.send(JSON.stringify({success: true, diary: user.diary, data: user.subjectData}))
+        user.subjectDataLast = user.subjectData
+      }
+    }
+    else {
+      response.send(JSON.stringify(result))
+    }
+  })
+})
+
+app.post('/GetGoals/', (request, response) => {
+  var data = request.body
+  updateCookies(request, function(result) {
+    if(result.success === true) {
+      var user = users[request.cookies.loginID]
+      
+      if(user.diary === 'IMKO') {
+        imkogoals.getGoals({school: user.school, childID: data.childID, quarterID: data.quarterID, subjectID: data.subjectID,
+          jar:user.jar}, response)
+      }
+      else {
+        jkogoals.getGoals({school: user.school, topicEvaluationID: data.topicEvaluationID,
+          quarterEvaluationID: data.quarterEvaluationID, journalID: data.journalID,
+          jar:user.jar}, response)
       }
     }
     else {
@@ -422,6 +445,7 @@ app.get('/Users/', (request, response) => {
     result += '<p>Role: ' + obj.role + '</p>'
     result += '<p>LoginID: ' + key + '</p>'
     result += '<p>Subject data: \n' + JSON.stringify(obj.subjectData) + '\n </p>'
+    result += '<p>Subject data last opened: \n' + JSON.stringify(obj.subjectDataLast) + '\n </p>'
     result += '<p>Raw: \n' + obj.raw + '</p>'
     result += '<hr>'
 	}
@@ -437,6 +461,11 @@ app.get('/', (request, response) => {
   text += '</body></html>'
   response.send(text)
 })
+
+var http = require('http')
+setInterval(() => {
+  http.get('http://nis-api.herokuapp.com')
+}, 300000)
 
 app.get('/', (request, response) => {
   throw new Error('Server : Error')
