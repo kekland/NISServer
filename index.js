@@ -199,7 +199,7 @@ app.post('/GetSubjectData/', (request, response) => {
         response.send(JSON.stringify({success: true, data: 'null', message: 'Data has not been prepared yet. Please, update again.'}))
       }
       else {
-        response.send(JSON.stringify({success: true, data: user.subjectData}))
+        response.send(JSON.stringify({success: true, diary: user.diary, data: user.subjectData}))
       }
     }
     else {
