@@ -200,7 +200,7 @@ app.post('/GetSubjectData/', (request, response) => {
       var subjectData = user.subjectData
       if(subjectData === undefined) {
         setSubjectForUser(user)
-        response.send(JSON.stringify({success: true, data: 'null', message: 'Data has not been prepared yet. Please, update again.'}))
+        response.send(JSON.stringify({success: false, data: 'null', message: 'Data has not been prepared yet. Please, update again.'}))
       }
       else {
         response.send(JSON.stringify({success: true, diary: user.diary, data: user.subjectData}))
