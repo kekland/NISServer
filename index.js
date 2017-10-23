@@ -32,6 +32,7 @@ function exitHandler () {
 
 process.on('exit', exitHandler.bind(null))
 process.on('SIGINT', exitHandler.bind(null))
+process.on('SIGTERM', exitHandler.bind(null))
 process.on('uncaughtException', (err) => {
   console.log(err)
 })
