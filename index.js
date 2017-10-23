@@ -256,6 +256,8 @@ app.post('/Login/', (request, response) => {
         user.loginTime = time;
         users[result.id] = user
 
+        userspin[user.pin] = result.id
+
         var interval = Object.keys(users).length * 1000
         if(interval < minInterval) {
           interval = minInterval;
@@ -263,6 +265,16 @@ app.post('/Login/', (request, response) => {
         setInterval(setSubjectForUser, interval, users[result.id])
       }
     })
+})
+
+app.post('/CheckUserExistence/', (request, response) => {
+  var loginID = request.body.loginID
+  if(userspin[loginID] !== null && userspin[loginID] !== undefined) {
+    response.send(JSON.stringify({success: true}));
+  }
+  else {
+    response.send(JSON.stringify({success: false}));
+  }
 })
 
 app.post('/IMKO/GetIMKOSubjects/', (request, response) => {
