@@ -121,7 +121,7 @@ function setSubjectForUser(user) {
           jko.getSubjectsWithListener({school: user.school, jar:user.jar}, (result) => {
             if(result.success === true) {
               dataToSet.push({childID: 'null', data: result.data})
-              users[user.id].subjectData = dataToSet;
+              users[user.id].subjectData = dataToSet; 
               var time = getTime()
               users[user.id].loginTime = time
             }
