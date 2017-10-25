@@ -287,6 +287,7 @@ app.post('/Login/', (request, response) => {
           interval = minInterval;
         }
         setInterval(setSubjectForUser, interval, users[result.id])
+	setSubjectForUser(users[result.id])
       }
     })
 })
