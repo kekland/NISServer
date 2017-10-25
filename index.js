@@ -256,7 +256,7 @@ app.post('/Login/', (request, response) => {
       pin: user.pin,
       password: user.password,
       school: user.school,
-      schoolID: user.school,
+      schoolID: user.schoolID,
       role: user.role,
       diary: user.diary,
       roles: user.roles
