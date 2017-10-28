@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>eNIS | Logs</title>
+    <style>
+      .error {
+        color: #EF5350
+      }
+    </style>
+  </head>
+  <body id='body'>
+    <p>Updating</p>
+  </body>
+  <script>
+    setInterval(() => {
+      fetch('/GetLogs/', {
+        method: 'get'
+      }).then(response => {
+        return response.text()
+      }).then(response => {
+        document.getElementById('body').innerHTML = response
+        console.log(response)
+      })
+      .catch(error => {
+        //Error connecting
+      })
+    }, 1000)
+  </script>
+</html>

@@ -1,0 +1,34 @@
+<html>
+    <head>
+      <title>eNIS | Request Test</title>
+      <style>
+        .error {
+          color: #EF5350
+        }
+      </style>
+    </head>
+    <body>
+      <input type="text" id="urlInput"> </input>
+      <input type="text" id="params"> </input>
+
+      <button onclick="post()">Start request</button>
+
+      <p id="data"></p>
+    </body>
+    <script>
+      function post() {
+        fetch(document.getElementById('urlInput').value, {
+          method: 'post',
+          body: document.getElementById('params').value
+        }).then(response => {
+          return response.text()
+        }).then(response => {
+          document.getElementById('data').innerHTML = response
+          console.log(response)
+        })
+        .catch(error => {
+          document.getElementById('data').innerHTML = error
+        })
+      }
+    </script>
+  </html>
