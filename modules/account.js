@@ -160,8 +160,8 @@ function getStudents(data) {
 
         for (let student of studentsData) {
           students.push({
-            class: data.class,
-            student: {
+            classData: data.class,
+            studentData: {
               id: student.Id,
               name: student.Name
             }
@@ -328,11 +328,11 @@ function getData(data) {
       locale = data.locale
     }
   
-    let schoolID = data.schoolID
+    let schoolID = data.school
     let school = null
     for(key in schoolConvert) {
-      if(key == data.school) {
-        school = schoolConvert[data.school]
+      if(key == schoolID) {
+        school = schoolConvert[schoolID]
         break;
       }
     }
