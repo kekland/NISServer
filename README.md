@@ -2,17 +2,14 @@
 # URLs
 Base URL is <code>https://nis-api.herokuapp.com/</code>
 ## Account
-### /Login/ ### 
-Log in to system - this request authenticates user to system and allows to use other requests.
-
-If request succeeded, you will recieve cookie called loginID. You should keep it forever, because this is the key to all requests.
+### /GetData/ ### 
+Get all information about requested user.
 
 _Query_ :
 - _pin_ : Personal Identification Number
 - _password_ : Password
 - _school_ : School ID (List of IDs and consecutive URLs are below)
-- _locale_ : User locale 
-- _diary_ : Diary, must be either 'IMKO' or 'JKO'
+- _locale_ : User locale (Optional - default is en-US)
 
 _There are three locales available : ru-RU, kk-KZ, en-US_
 
@@ -22,19 +19,24 @@ _There are three locales available : ru-RU, kk-KZ, en-US_
   school: "http://fmalm.nis.edu.kz/Almaty_Fmsh", schoolID: "almaty_phmd",
   role: "Student", roles: [{value: "Student", text: "Ученик"}, {value: "Teacher", text: "Учитель"}],
   locale: "ru-RU"}
+  
+- {success: true, pin: "123456789123", password: "SamplePassword", 
+  school: "http://fmalm.nis.edu.kz/Almaty_Fmsh", schoolID: "almaty_phmd",
+  role: "Student", roles: [{value: "Student", text: "Ученик"}, {value: "Teacher", text: "Учитель"}],
+  locale: "ru-RU", children: [{class: {id: "1", name: "10-B"}, student: {id: ""2", name: "Какое-то имя"}}]}
 
 - {success: false, message: "Incorrect username or password"}
   
 ```
 
-### /Misc/CheckCredentials/ ### 
+### /CheckCredentials/ ### 
 Check user credentials, does not require and grant authentication
 
 _Query_ :
 - _pin_ : Personal Identification Number
 - _password_ : Password
 - _school_ : School ID (List of IDs and consecutive URLs are below)
-- _locale_ : User locale 
+- _locale_ : User locale (Optional - default is en-US)
 
 _There are three locales available : ru-RU, kk-KZ, en-US_
 
@@ -51,16 +53,14 @@ _There are three locales available : ru-RU, kk-KZ, en-US_
 
 Will respond with subject information for all 4 quarters.
 
-Beware : this method can contain outdated information with latency ranging from 10 minutes to 1 hour.
-
-Also, this method can user Firebase Cloud Messaging to send push notifications. Use method _/Notifications/LinkFCMToken_ to link Firebase token to user.
-
-Does not require any parameters.
+_Query_ :
+- _pin_ : Personal Identification Number
+- _password_ : Password
+- _school_ : School ID (List of IDs and consecutive URLs are below)
+- _locale_ : User locale (Optional - default is en-US)
 
 #### Sample response : ####
 ```
-//This method can respond with null, if user just logged in, or server was too slow.
-- {success: true, data: 'null', message: 'Data has not been prepared yet. Please, update again.'}
 
 //If user role was Student, then childID will be set to 'null'
 //IMKO : Student
@@ -103,79 +103,40 @@ Does not require any parameters.
 ```
 
 ## Goals
-### /IMKO/GetIMKOGoals/ ###
+### /GetGoals/ ###
 Gets IMKO goals, requires authentication and cookie
 
 _Query_ :
-- _quarterID_ : ID of quarter (from 1 to 4)
-- _subjectID_ : ID of subject
-- _childID_ : ID of child - leave blank if user role is not parent
+- _pin_ : Personal Identification Number
+- _password_ : Password
+- _school_ : School ID (List of IDs and consecutive URLs are below)
+- _locale_ : User locale (Optional - default is en-US)
+- _diary_ : Diary (Either IMKO or JKO)
+
+_Required query if diary is IMKO :_
+- _studentID_ : ID of student, leave blank if user role is Student
+- _subjectID_ : ID of subject 
+- _quarterID_ : ID of quarter (1 - 4)
+
+_Reqiuired query if diary is JKO:_
+- _topicEvaluationID_ : ID of topic evaluation
+- _quarterEvaluationID_ : ID of quarter evaluation
+- _journalID_ : Journal ID of subject
 
 #### Sample response : ####
 ```
+//IMKO
 - {success: true, goals: [{index: "0", text: "Algebra", data: [{id: "13", name: "1.1.1", description: "Know something", status: "Achieved", statusCode: "1", comment: "", changedDate: "01.01.2017}]}], homework: [{description: "Do something", date: "01.01.2017", files:[{name: "Kazakh culture in 2017.pptx", url: "fmalm.nis.edu.kz/DownloadURL/blahblah.pptx"}]}]} 
 
 - {success: true, goals: [{index: "0", text: "Algebra", data: [{id: "13", name: "1.1.1", description: "Know something", status: "Achieved", statusCode: "1", comment: "", changedDate: "01.01.2017}]}], homework: []} 
   
-- {success: false, message: "Some kind of an error occurred"}
-```
-
-### /JKO/GetJKOGoals/ ### 
-Gets JKO goals, requires authentication and cookie
-
-_Query_ :
-- _topicEvaluationID_ : ID of topic evaluation
-- _quarterEvaluationID_ : ID of quarter evaluation
-- _journalID_ : ID of subject in journal
-
-#### Sample response : ####
-```
+//JKO
 - {success: true, data: [{name: "Do something", topic: {score: "15", maxScore: "15"}, quarter: {score: "15", maxScore: "15"}}]} 
 
 - {success: true, data: [{name: "Do something", topic: {score: "0" maxScore: "15"}, quarter: {score: "0", maxScore: "15"}}]} 
 
+//Error
 - {success: false, message: "Some kind of an error occurred"}
-```
-
-## Data manipulation
-### /Data/ChangeLocale
-Changes locale. Requires cookie of user.
-
-_Query_ :
-- _locale_ : Locale to change to.
-
-#### Sample response : ####
-```
-- {success: true} 
-
-- {success: false, message: 'User not found in database'}
-```
-
-### /Data/ChangeDiary
-Changes diary. Requires cookie of user.
-
-_Query_ :
-- diary : Diary to change to.
-
-#### Sample response : ####
-```
-- {success: true} 
-
-- {success: false, message: 'Invalid diary type'}
-
-- {success: false, message: 'User not found in database'}
-```
-
-### /Notifications/LinkFCMToken
-Used to link Firebase Cloud Messaging token to user. Sends Push notifications each time subject data updates.
-
-More information about setting up soon.
-
-#### Sample response : ####
-```
-- {success: true} 
-
-- {success: false, message: 'User not found in database'}
 ```
 
 ## School IDs and consecutive URLs
